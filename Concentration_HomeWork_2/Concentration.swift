@@ -22,6 +22,9 @@ struct Concentration {
             }
         }
     }
+    private(set) var countFlips = 0
+    
+    private(set) var countScores = 0
     
     init(numberOfPairsOfCards: Int) {
         assert(numberOfPairsOfCards>0, "Concentraition.chooseCards: \(numberOfPairsOfCards): you must have at list one pair of cards")
@@ -34,19 +37,41 @@ struct Concentration {
     
     mutating func chooseCard(at index: Int){
         assert(cards.indices.contains(index), "Concentraition.chooseCards: \(index): index is not in the cards")
+        countFlips += 1
         if !cards[index].isMatched{
             if let matchedIndex = indexOfOneAndOnlyFaceUpCard, index != matchedIndex {
-                    if cards[index] == cards[matchedIndex] {
-                        cards[index].isMatched = true
-                        cards[matchedIndex].isMatched = true
-                    }
+                if cards[index] == cards[matchedIndex] {
+                    cards[index].isMatched = true
+                    cards[matchedIndex].isMatched = true
+                }
+                checkCardAndCountScore(with: index)
+                checkCardAndCountScore(with: matchedIndex)
+                
                 cards[index].isFaceUp = true
             }else{
                 indexOfOneAndOnlyFaceUpCard = index
             }
         }
     }
+    
+    mutating func checkCardAndCountScore(with indexOfCard: Int) {
+        if cards[indexOfCard].isMatched{
+            countScores += 1
+        }else{
+            if cards[indexOfCard].wasFacedUp != true {
+                for index in cards.indices {
+                    if cards[index] == cards[indexOfCard]{
+                        cards[index].wasFacedUp = true
+                    }
+                }
+            }else{
+                countScores -= 1
+            }
+        }
+    }
+    
 }
+
 
 extension Collection {
     var oneAndOnlyElementInCollection: Element? {
