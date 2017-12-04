@@ -70,6 +70,21 @@ struct Concentration {
         }
     }
     
+    mutating func shuffleCards(){
+        for i in 0..<cards.count{
+            cards[i].isFaceUp = false
+            cards[i].isMatched = false
+            cards[i].wasFacedUp = false
+        }
+        cards.shuffle()
+    }
+    
+    mutating func startNewGame(){
+        countFlips = 0
+        countScores = 0
+        shuffleCards()
+    }
+    
 }
 
 
@@ -91,8 +106,10 @@ extension Int {
     }
 }
 
+
 extension Array{
     mutating func shuffle(){
+        if count < 2 {return}
         var last = count-1
         while last > 0 {
             let randomIndex = last.randomInt
@@ -101,3 +118,4 @@ extension Array{
         }
     }
 }
+

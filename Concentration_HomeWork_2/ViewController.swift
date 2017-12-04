@@ -102,7 +102,8 @@ class ViewController: UIViewController {
         let randomGameThemeKey = gameThemeKeys[gameThemeKeys.count.randomInt]
         if let randomTheme = gameThemes[randomGameThemeKey] {
             emojiChoices = randomTheme
-            game = Concentration(numberOfPairsOfCards: numberOfpairsOfCards)
+            game.startNewGame()
+            emoji = [Card:String]()
             updateCardButtonsView()
         }
     }
