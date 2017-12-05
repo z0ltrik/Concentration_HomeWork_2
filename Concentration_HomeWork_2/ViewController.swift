@@ -18,13 +18,11 @@ class ViewController: UIViewController {
         }
     }
     
-    
     @IBOutlet weak var scoresLabel: UILabel!{
         didSet{
             updateLabel(scoresLabel, withText: "Scores: 0")
         }
     }
-    
     
     var numberOfpairsOfCards: Int {
         get{
@@ -34,11 +32,6 @@ class ViewController: UIViewController {
     
     private lazy var game = Concentration(numberOfPairsOfCards: numberOfpairsOfCards)
     
-    //    private(set) var countFlips = 0 {
-    //        didSet{
-    //            updateLabel(flipCountLabel, with: "Flip: \(game.)")
-    //        }
-    //    }
     private func updateLabel(_ label: UILabel, withText text: String){
         let attributesForLabel: [NSAttributedStringKey: Any] = [
             //.strokeColor: UIColor.orange,
@@ -47,30 +40,28 @@ class ViewController: UIViewController {
         label.attributedText = NSAttributedString(string: text, attributes: attributesForLabel)
     }
     
-    //private var emojiChoices = ["👹","👻","🎃","🧜‍♂️","👽","🧙‍♂️","😈","🧞‍♂️","🧟‍♂️","🤖"]
-    
     private let gameThemes: Dictionary<String,String> =
-        [ "Hallowen":   "👹👻🎃🧜‍♂️👽🧙‍♂️😈🧞‍♂️🧟‍♂️🤖🧛‍♂️🧚‍♀️",
+        [ "Halloween":   "👹👻🎃🧜‍♂️👽🧙‍♂️😈🧞‍♂️🧟‍♂️🤖🧛‍♂️🧚‍♀️",
           "Transport":   "🛴🚲🚄🛵🏍🚜✈️🚀🛳🚁🏎🚌",
-          "Animals":    "🐶🐱🐹🦊🐻🐼🐨🐯🐸🐮🦁🐵",
-          "Fuits":      "🍎🍐🍊🍋🍌🍉🍇🍓🥥🥝🍍🍒",
-          "Food":       "🥪🍳🍪🥞🌮🌯🍕🥗🍣🍥🍦🍭",
-          "Activites":  "⚽️⛹️‍♂️🏄‍♂️🏊‍♂️🏓🚴‍♂️🏇🏌️‍♂️🏒🤼‍♂️🏂🤺"
+          "Animals":     "🐶🐱🐹🦊🐻🐼🐨🐯🐸🐮🦁🐵",
+          "Fruits":      "🍎🍐🍊🍋🍌🍉🍇🍓🥥🥝🍍🍒",
+          "Food":        "🥪🍳🍪🥞🌮🌯🍕🥗🍣🍥🍦🍭",
+          "Activities":   "⚽️⛹️‍♂️🏄‍♂️🏊‍♂️🏓🚴‍♂️🏇🏌️‍♂️🏒🤼‍♂️🏂🤺"
     ]
     
-    private var emojiChoices = "👹👻🎃🧜‍♂️👽🧙‍♂️😈🧞‍♂️🧟‍♂️🤖🧛‍♂️🧚‍♀️"
+    lazy private var emojiChoices = pickTheme()
     
     private var emoji = [Card:String]()
     
     @IBAction func touchCard(_ sender: UIButton) {
         if let cardIndex = cardButtons.index(of: sender) {
             game.chooseCard(at: cardIndex)
-            updateCardButtonsView()
+            updateCardButtonsAndLabelsView()
         }
         //   countFlips += 1
     }
     
-    func updateCardButtonsView(){
+    func updateCardButtonsAndLabelsView(){
         
         updateLabel(flipCountLabel, withText: "Flips: \(game.countFlips)")
         updateLabel(scoresLabel, withText: "Scores: \(game.countScores)")
@@ -98,15 +89,23 @@ class ViewController: UIViewController {
     }
     
     @IBAction func startNewGame(_ sender: UIButton) {
+        emojiChoices = pickTheme()
+        game.startNewGame()
+        emoji = [Card:String]()
+        updateCardButtonsAndLabelsView()
+        
+    }
+    
+    func pickTheme() -> String{
         let gameThemeKeys = Array(gameThemes.keys)
         let randomGameThemeKey = gameThemeKeys[gameThemeKeys.count.randomInt]
-        if let randomTheme = gameThemes[randomGameThemeKey] {
-            emojiChoices = randomTheme
-            game.startNewGame()
-            emoji = [Card:String]()
-            updateCardButtonsView()
+        if let randomThemeEmoji = gameThemes[randomGameThemeKey] {
+            return randomThemeEmoji
+        } else{
+            return ""
         }
     }
+    
     
     // end of the class
 }
