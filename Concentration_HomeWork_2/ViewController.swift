@@ -14,13 +14,13 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var flipCountLabel: UILabel!{
         didSet{
-            updateLabel(flipCountLabel, withText: "Flip: 0")
+            updateLabel(flipCountLabel, withText: "Flip: 0", textColor: #colorLiteral(red: 1, green: 0.5763723254, blue: 0, alpha: 1))
         }
     }
     
     @IBOutlet weak var scoresLabel: UILabel!{
         didSet{
-            updateLabel(scoresLabel, withText: "Scores: 0")
+            updateLabel(scoresLabel, withText: "Scores: 0", textColor: #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1))
         }
     }
     
@@ -32,9 +32,9 @@ class ViewController: UIViewController {
     
     private lazy var game = Concentration(numberOfPairsOfCards: numberOfpairsOfCards)
     
-    private func updateLabel(_ label: UILabel, withText text: String){
+    private func updateLabel(_ label: UILabel, withText text: String, textColor:UIColor){
         let attributesForLabel: [NSAttributedStringKey: Any] = [
-            //.strokeColor: UIColor.orange,
+            .strokeColor: textColor,
             .strokeWidth: -3.0
         ]
         label.attributedText = NSAttributedString(string: text, attributes: attributesForLabel)
@@ -53,18 +53,20 @@ class ViewController: UIViewController {
     
     private var emoji = [Card:String]()
     
-    @IBAction func touchCard(_ sender: UIButton) {
-        if let cardIndex = cardButtons.index(of: sender) {
-            game.chooseCard(at: cardIndex)
-            updateCardButtonsAndLabelsView()
+    func getEmoji(for card: Card) -> String{
+        let foundEmoji = emoji[card]
+        if foundEmoji == nil && emojiChoices.count > 0 {
+            let randomEmojiIndex = emojiChoices.count.randomInt
+            let randomStringIndex = emojiChoices.index(emojiChoices.startIndex, offsetBy: randomEmojiIndex)
+            emoji[card] = String(emojiChoices.remove(at: randomStringIndex))
         }
-        //   countFlips += 1
+        return emoji[card] ?? "?"
     }
     
     func updateCardButtonsAndLabelsView(){
         
-        updateLabel(flipCountLabel, withText: "Flips: \(game.countFlips)")
-        updateLabel(scoresLabel, withText: "Scores: \(game.countScores)")
+        updateLabel(flipCountLabel, withText: "Flips: \(game.countFlips)", textColor: #colorLiteral(red: 1, green: 0.5763723254, blue: 0, alpha: 1))
+        updateLabel(scoresLabel, withText: "Scores: \(game.countScores)", textColor: #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1))
         
         for index in cardButtons.indices {
             if game.cards[index].isFaceUp {
@@ -78,22 +80,12 @@ class ViewController: UIViewController {
         }
     }
     
-    func getEmoji(for card: Card) -> String{
-        let foundEmoji = emoji[card]
-        if foundEmoji == nil && emojiChoices.count > 0 {
-            let randomEmojiIndex = emojiChoices.count.randomInt
-            let randomStringIndex = emojiChoices.index(emojiChoices.startIndex, offsetBy: randomEmojiIndex)
-            emoji[card] = String(emojiChoices.remove(at: randomStringIndex))
+    @IBAction func touchCard(_ sender: UIButton) {
+        if let cardIndex = cardButtons.index(of: sender) {
+            game.chooseCard(at: cardIndex)
+            updateCardButtonsAndLabelsView()
         }
-        return emoji[card] ?? "?"
-    }
-    
-    @IBAction func startNewGame(_ sender: UIButton) {
-        emojiChoices = pickTheme()
-        game.startNewGame()
-        emoji = [Card:String]()
-        updateCardButtonsAndLabelsView()
-        
+        //   countFlips += 1
     }
     
     func pickTheme() -> String{
@@ -104,6 +96,13 @@ class ViewController: UIViewController {
         } else{
             return ""
         }
+    }
+    
+    @IBAction func startNewGame(_ sender: UIButton) {
+        emojiChoices = pickTheme()
+        game.startNewGame()
+        emoji = [Card:String]()
+        updateCardButtonsAndLabelsView()
     }
     
     
