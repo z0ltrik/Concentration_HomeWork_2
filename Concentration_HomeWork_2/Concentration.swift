@@ -12,6 +12,9 @@ struct Concentration {
     
     private(set) var cards = [Card]()
     
+    // определим исходное значение 1970 годом
+    private var timOfOpenOneAndOnlyFaceUpCard = Date(timeIntervalSince1970: 0)
+    
     private var indexOfOneAndOnlyFaceUpCard: Int? {
         get{
             return cards.indices.filter{cards[$0].isFaceUp}.oneAndOnlyElementInCollection
@@ -32,7 +35,7 @@ struct Concentration {
             let newCard = Card()
             cards += [newCard, newCard]
         }
-        cards.shuffle()
+        //cards.shuffle()
     }
     
     mutating func chooseCard(at index: Int){
@@ -51,22 +54,26 @@ struct Concentration {
                 
             }else{
                 indexOfOneAndOnlyFaceUpCard = index
+                // если карту уже открывалась ранее, то возьмем время ее первого открытия, иначе текущее время
+                timOfOpenOneAndOnlyFaceUpCard = cards[index].wasFacedUpDate ?? Date()
             }
         }
     }
     
     mutating func checkCardsAndCountScore(firstCardIndex cardIndex: Int, secondCardIndex mathcedCardIndex: Int) {
-
+        
         // если одна из карт имеет признак совпавшей, то и другая тоже
         if cards[cardIndex].isMatched{
-            // если обе карты уже были открыты ранее
-            if cards[cardIndex].wasFacedUpDate != nil && cards[mathcedCardIndex].wasFacedUpDate != nil{
+            // если обе карты открылись впервые, то даем супер-приз за удачу - 10 очков
+            if cards[cardIndex].wasFacedUpDate == nil && cards[mathcedCardIndex].wasFacedUpDate == nil{
                 
-                // возьмем максимальную дату из двух совпадающих карт, считая что отсчет надо вести, когда игрок обнаружил последнюю из совпадающих карт, после этого он, при наличии хорошей памяти, знает, где обе карты и должны открыть их быстро, будем анализировать это время
-                let maxDateOfTwoMatchedCards = max(cards[cardIndex].wasFacedUpDate!, cards[mathcedCardIndex].wasFacedUpDate!)
+                countScores += 10
                 
-                let duration = Date().timeIntervalSince(maxDateOfTwoMatchedCards)
+            }else{
                 
+                // определим разницу между текущим временем и временем открытия первой карты
+                let duration = Date().timeIntervalSince(timOfOpenOneAndOnlyFaceUpCard)
+
                 // установим стандартное количество балов за угадывание пары
                 var points = 2
                 
@@ -75,24 +82,13 @@ struct Concentration {
                 case 0...3:
                     points *= 2
                 // если открыли совпадние от 4 до 6 секунд, то дадим на 1 бал больше, чем стандарт
-                case 4...6:
+                case 4...7:
                     points += 1
                 default:
                     break
                 }
                 
                 countScores += points
-                
-            }
-            // если обе карты открыты наугад и произошло совпадение - дадим 8 очков
-            else{
-                if cards[cardIndex].wasFacedUpDate == nil && cards[mathcedCardIndex].wasFacedUpDate == nil{
-                    countScores += 8
-                }
-                // если одна из совпавших карт ранее не была открыта - дадим 6 очков
-                else{
-                        countScores += 6
-                }
                 
             }
             
@@ -121,7 +117,7 @@ struct Concentration {
             cards[i].isMatched = false
             cards[i].wasFacedUpDate = nil
         }
-            cards.shuffle()
+        //cards.shuffle()
     }
 }
 
