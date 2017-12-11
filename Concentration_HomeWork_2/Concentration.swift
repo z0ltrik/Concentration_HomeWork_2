@@ -37,54 +37,92 @@ struct Concentration {
     
     mutating func chooseCard(at index: Int){
         assert(cards.indices.contains(index), "Concentraition.chooseCards: \(index): index is not in the cards")
-        countFlips += 1
         if !cards[index].isMatched{
+            countFlips += 1
             if let matchedIndex = indexOfOneAndOnlyFaceUpCard, index != matchedIndex {
                 if cards[index] == cards[matchedIndex] {
                     cards[index].isMatched = true
                     cards[matchedIndex].isMatched = true
                 }
-                checkCardAndCountScore(with: index)
-                checkCardAndCountScore(with: matchedIndex)
+                
+                checkCardsAndCountScore(firstCardIndex: index, secondCardIndex: matchedIndex)
                 
                 cards[index].isFaceUp = true
+                
             }else{
                 indexOfOneAndOnlyFaceUpCard = index
             }
         }
     }
     
-    mutating func checkCardAndCountScore(with indexOfCard: Int) {
-        if cards[indexOfCard].isMatched{
-            countScores += 1
-        }else{
-            if cards[indexOfCard].wasFacedUp != true {
-                for index in cards.indices {
-                    if cards[index] == cards[indexOfCard]{
-                        cards[index].wasFacedUp = true
-                    }
+    mutating func checkCardsAndCountScore(firstCardIndex cardIndex: Int, secondCardIndex mathcedCardIndex: Int) {
+
+        // если одна из карт имеет признак совпавшей, то и другая тоже
+        if cards[cardIndex].isMatched{
+            // если обе карты уже были открыты ранее
+            if cards[cardIndex].wasFacedUpDate != nil && cards[mathcedCardIndex].wasFacedUpDate != nil{
+                
+                // возьмем максимальную дату из двух совпадающих карт, считая что отсчет надо вести, когда игрок обнаружил последнюю из совпадающих карт, после этого он, при наличии хорошей памяти, знает, где обе карты и должны открыть их быстро, будем анализировать это время
+                let maxDateOfTwoMatchedCards = max(cards[cardIndex].wasFacedUpDate!, cards[mathcedCardIndex].wasFacedUpDate!)
+                
+                let duration = Date().timeIntervalSince(maxDateOfTwoMatchedCards)
+                
+                // установим стандартное количество балов за угадывание пары
+                var points = 2
+                
+                switch duration{
+                // если открыли совпадение за 3 секунды, то увеличим вдвое количество стандартных очков
+                case 0...3:
+                    points *= 2
+                // если открыли совпадние от 4 до 6 секунд, то дадим на 1 бал больше, чем стандарт
+                case 4...6:
+                    points += 1
+                default:
+                    break
                 }
+                
+                countScores += points
+                
+            }
+            // если обе карты открыты наугад и произошло совпадение - дадим 8 очков
+            else{
+                if cards[cardIndex].wasFacedUpDate == nil && cards[mathcedCardIndex].wasFacedUpDate == nil{
+                    countScores += 8
+                }
+                // если одна из совпавших карт ранее не была открыта - дадим 6 очков
+                else{
+                        countScores += 6
+                }
+                
+            }
+            
+        }else{
+            if cards[cardIndex].wasFacedUpDate == nil {
+                cards[cardIndex].wasFacedUpDate = Date()
             }else{
                 countScores -= 1
             }
+            
+            if cards[mathcedCardIndex].wasFacedUpDate == nil{
+                cards[mathcedCardIndex].wasFacedUpDate = Date()
+            }else{
+                countScores -= 1
+            }
+            
         }
     }
     
-    mutating func shuffleCards(){
-        for i in 0..<cards.count{
-            cards[i].isFaceUp = false
-            cards[i].isMatched = false
-            cards[i].wasFacedUp = false
-        }
-        cards.shuffle()
-    }
     
     mutating func startNewGame(){
         countFlips = 0
         countScores = 0
-        shuffleCards()
+        for i in 0..<cards.count{
+            cards[i].isFaceUp = false
+            cards[i].isMatched = false
+            cards[i].wasFacedUpDate = nil
+        }
+            cards.shuffle()
     }
-    
 }
 
 

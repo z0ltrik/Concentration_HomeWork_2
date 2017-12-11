@@ -40,16 +40,18 @@ class ViewController: UIViewController {
         label.attributedText = NSAttributedString(string: text, attributes: attributesForLabel)
     }
     
-    private let gameThemes: Dictionary<String,String> =
-        [ "Halloween":   "👹👻🎃🧜‍♂️👽🧙‍♂️😈🧞‍♂️🧟‍♂️🤖🧛‍♂️🧚‍♀️",
-          "Transport":   "🛴🚲🚄🛵🏍🚜✈️🚀🛳🚁🏎🚌",
-          "Animals":     "🐶🐱🐹🦊🐻🐼🐨🐯🐸🐮🦁🐵",
-          "Fruits":      "🍎🍐🍊🍋🍌🍉🍇🍓🥥🥝🍍🍒",
-          "Food":        "🥪🍳🍪🥞🌮🌯🍕🥗🍣🍥🍦🍭",
-          "Activities":   "⚽️⛹️‍♂️🏄‍♂️🏊‍♂️🏓🚴‍♂️🏇🏌️‍♂️🏒🤼‍♂️🏂🤺"
+    private let gameThemes: Dictionary<String,GameThemeSkin> =
+        [ "Halloween":   GameThemeSkin(emojiSet: "👹👻🎃🧜‍♂️👽🧙‍♂️😈🧞‍♂️🧟‍♂️🤖🧛‍♂️🧚‍♀️", displayBackgroundColor: #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1), cardsBackgroundColor: #colorLiteral(red: 1, green: 0.5763723254, blue: 0, alpha: 1)),
+          "Transport":   GameThemeSkin(emojiSet: "🛴🚲🚄🛵🏍🚜✈️🚀🛳🚁🏎🚌", displayBackgroundColor: #colorLiteral(red: 0.5568627715, green: 0.3529411852, blue: 0.9686274529, alpha: 1), cardsBackgroundColor: #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)),
+          "Animals":     GameThemeSkin(emojiSet: "🐶🐱🐹🦊🐻🐼🐨🐯🐸🐮🦁🐵", displayBackgroundColor: #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1), cardsBackgroundColor: #colorLiteral(red: 0.9098039269, green: 0.4784313738, blue: 0.6431372762, alpha: 1)),
+          "Fruits":      GameThemeSkin(emojiSet: "🍎🍐🍊🍋🍌🍉🍇🍓🥥🥝🍍🍒", displayBackgroundColor: #colorLiteral(red: 0.721568644, green: 0.8862745166, blue: 0.5921568871, alpha: 1), cardsBackgroundColor: #colorLiteral(red: 0.9764705896, green: 0.850980401, blue: 0.5490196347, alpha: 1)),
+          "Food":        GameThemeSkin(emojiSet: "🥪🍳🍪🥞🌮🌯🍕🥗🍣🍥🍦🍭", displayBackgroundColor: #colorLiteral(red: 0.9098039269, green: 0.4784313738, blue: 0.6431372762, alpha: 1), cardsBackgroundColor: #colorLiteral(red: 0.5568627715, green: 0.3529411852, blue: 0.9686274529, alpha: 1)),
+          "Activities":   GameThemeSkin(emojiSet: "⚽️⛹️‍♂️🏄‍♂️🏊‍♂️🏓🚴‍♂️🏇🏌️‍♂️🏒🤼‍♂️🏂🤺", displayBackgroundColor: #colorLiteral(red: 0.01680417731, green: 0.1983509958, blue: 1, alpha: 1), cardsBackgroundColor: #colorLiteral(red: 0.721568644, green: 0.8862745166, blue: 0.5921568871, alpha: 1))
     ]
     
-    lazy private var emojiChoices = pickTheme()
+    private var emojiChoices = ""
+    
+    private var currentThemeKey = ""
     
     private var emoji = [Card:String]()
     
@@ -75,7 +77,9 @@ class ViewController: UIViewController {
             }
             else{
                 cardButtons[index].setTitle(" ", for: UIControlState.normal)
-                cardButtons[index].backgroundColor = !game.cards[index].isMatched ? #colorLiteral(red: 1, green: 0.5763723254, blue: 0, alpha: 1) : #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
+                if let theme = gameThemes[currentThemeKey]{
+                cardButtons[index].backgroundColor = !game.cards[index].isMatched ? theme.cardsBackgroundColor : #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
+                }
             }
         }
     }
@@ -85,27 +89,37 @@ class ViewController: UIViewController {
             game.chooseCard(at: cardIndex)
             updateCardButtonsAndLabelsView()
         }
-        //   countFlips += 1
     }
     
-    func pickTheme() -> String{
+    func pickThemeAndSetSkin(){
         let gameThemeKeys = Array(gameThemes.keys)
         let randomGameThemeKey = gameThemeKeys[gameThemeKeys.count.randomInt]
-        if let randomThemeEmoji = gameThemes[randomGameThemeKey] {
-            return randomThemeEmoji
-        } else{
-            return ""
+        if let randomTheme = gameThemes[randomGameThemeKey] {
+            self.view.backgroundColor = randomTheme.displayBackgroundColor
+            for button in cardButtons{
+                button.backgroundColor = randomTheme.cardsBackgroundColor
+            }
+            emojiChoices = randomTheme.emojiSet
+            currentThemeKey = randomGameThemeKey
         }
     }
     
     @IBAction func startNewGame(_ sender: UIButton) {
-        emojiChoices = pickTheme()
+        pickThemeAndSetSkin()
         game.startNewGame()
         emoji = [Card:String]()
         updateCardButtonsAndLabelsView()
     }
     
+    struct GameThemeSkin{
+        let emojiSet: String
+        let displayBackgroundColor: UIColor
+        let cardsBackgroundColor: UIColor
+    }
     
+    override func viewDidLoad() {
+        pickThemeAndSetSkin()
+    }
     // end of the class
 }
 
