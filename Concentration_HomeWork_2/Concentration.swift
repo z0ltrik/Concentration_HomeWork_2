@@ -54,7 +54,6 @@ struct Concentration {
                 
             }else{
                 indexOfOneAndOnlyFaceUpCard = index
-                // если карту уже открывалась ранее, то возьмем время ее первого открытия, иначе текущее время
                 timOfOpenOneAndOnlyFaceUpCard = Date()
             }
         }
