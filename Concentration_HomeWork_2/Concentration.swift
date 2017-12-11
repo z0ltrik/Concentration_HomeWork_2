@@ -35,7 +35,7 @@ struct Concentration {
             let newCard = Card()
             cards += [newCard, newCard]
         }
-        //cards.shuffle()
+        cards.shuffle()
     }
     
     mutating func chooseCard(at index: Int){
@@ -55,7 +55,7 @@ struct Concentration {
             }else{
                 indexOfOneAndOnlyFaceUpCard = index
                 // если карту уже открывалась ранее, то возьмем время ее первого открытия, иначе текущее время
-                timOfOpenOneAndOnlyFaceUpCard = cards[index].wasFacedUpDate ?? Date()
+                timOfOpenOneAndOnlyFaceUpCard = Date()
             }
         }
     }
@@ -65,15 +65,11 @@ struct Concentration {
         // если одна из карт имеет признак совпавшей, то и другая тоже
         if cards[cardIndex].isMatched{
             // если обе карты открылись впервые, то даем супер-приз за удачу - 10 очков
-            if cards[cardIndex].wasFacedUpDate == nil && cards[mathcedCardIndex].wasFacedUpDate == nil{
-                
+            if !cards[cardIndex].wasFacedUp && !cards[mathcedCardIndex].wasFacedUp{
                 countScores += 10
-                
             }else{
-                
                 // определим разницу между текущим временем и временем открытия первой карты
                 let duration = Date().timeIntervalSince(timOfOpenOneAndOnlyFaceUpCard)
-
                 // установим стандартное количество балов за угадывание пары
                 var points = 2
                 
@@ -87,20 +83,18 @@ struct Concentration {
                 default:
                     break
                 }
-                
                 countScores += points
-                
             }
             
         }else{
-            if cards[cardIndex].wasFacedUpDate == nil {
-                cards[cardIndex].wasFacedUpDate = Date()
+            if !cards[cardIndex].wasFacedUp {
+                cards[cardIndex].wasFacedUp = true
             }else{
                 countScores -= 1
             }
             
-            if cards[mathcedCardIndex].wasFacedUpDate == nil{
-                cards[mathcedCardIndex].wasFacedUpDate = Date()
+            if !cards[mathcedCardIndex].wasFacedUp{
+                cards[mathcedCardIndex].wasFacedUp = true
             }else{
                 countScores -= 1
             }
@@ -113,11 +107,11 @@ struct Concentration {
         countFlips = 0
         countScores = 0
         for i in 0..<cards.count{
-            cards[i].isFaceUp = false
-            cards[i].isMatched = false
-            cards[i].wasFacedUpDate = nil
+            cards[i].isFaceUp   = false
+            cards[i].isMatched  = false
+            cards[i].wasFacedUp = false
         }
-        //cards.shuffle()
+        cards.shuffle()
     }
 }
 
